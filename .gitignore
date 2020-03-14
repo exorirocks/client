@@ -1,0 +1,5 @@
+otclientv8.log
+!.gitignore
+crashreport.log
+exception.dmp
+exception_full.dmp
