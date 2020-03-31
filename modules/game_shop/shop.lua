@@ -122,7 +122,7 @@ function createShop()
   if shop then return end
   shop = g_ui.displayUI('shop')
   shop:hide()
-  shopButton = modules.client_topmenu.addRightGameToggleButton('shopButton', tr('Shop'), '/images/topbuttons/shop', toggle)
+  shopButton = modules.client_topmenu.addRightGameToggleButton('shopButton', tr('Shop'), '/images/topbuttons/shop', toggle, false, 8)
   connect(shop.categories, { onChildFocusChange = changeCategory })
 end
 
@@ -317,6 +317,11 @@ function processMessage(data)
   local title = tr(data["title"])
   local msg = data["msg"]
   msgWindow = displayInfoBox(title, msg)
+  msgWindow.onDestroy = function(widget)
+    if widget == msgWindow then
+      msgWindow = nil
+    end
+  end
   msgWindow:show()
   msgWindow:raise()
   msgWindow:focus()

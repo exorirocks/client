@@ -414,6 +414,12 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
     if useThing:isRotateable() then
       menu:addOption(tr('Rotate'), function() g_game.rotate(useThing) end)
     end
+    if useThing:isWrapable() then
+      menu:addOption(tr('Wrap'), function() g_game.wrap(useThing) end)
+    end
+    if useThing:isUnwrapable() then
+      menu:addOption(tr('Unwrap'), function() g_game.wrap(useThing) end)
+    end
 
     if g_game.getFeature(GameBrowseField) and useThing:getPosition().x ~= 0xffff then
       menu:addOption(tr('Browse Field'), function() g_game.browseField(useThing:getPosition()) end)
@@ -547,9 +553,9 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
   if g_game.getFeature(GameBot) and useThing and useThing:isItem() then
     menu:addSeparator()
     if useThing:getSubType() > 1 then
-      menu:addOption("ID: " .. useThing:getId() .. " SubType: " .. useThing:getSubType())    
+      menu:addOption("ID: " .. useThing:getId() .. " SubType: " .. useThing:getSubType(), function() end)    
     else
-      menu:addOption("ID: " .. useThing:getId())
+      menu:addOption("ID: " .. useThing:getId(), function() end)
     end
   end
 
@@ -832,10 +838,7 @@ function refreshViewMode()
     return
   end
 
-  local minimumWidth = (g_settings.getNumber("rightPanels") + g_settings.getNumber("leftPanels") - 1) * 200
-  if classic then
-    minimumWidth = minimumWidth + 400
-  end
+  local minimumWidth = (g_settings.getNumber("rightPanels") + g_settings.getNumber("leftPanels") - 1) * 200 + 300
   minimumWidth = math.max(minimumWidth, 800)
   g_window.setMinimumSize({ width = minimumWidth, height = 600 })
   if g_window.getWidth() < minimumWidth then
@@ -865,9 +868,6 @@ function refreshViewMode()
     gameMapPanel:setMarginLeft(0)
     gameMapPanel:setMarginRight(0)
     gameMapPanel:setMarginTop(0)
-    if modules.game_textmessage then
-      modules.game_textmessage.messagesPanel:setMarginTop(0)
-    end
   else
     gameLeftPanels:setMarginTop(modules.client_topmenu.getTopMenu():getHeight() - gameLeftPanels:getPaddingTop())
     gameRightPanels:setMarginTop(modules.client_topmenu.getTopMenu():getHeight() - gameRightPanels:getPaddingTop())
@@ -877,7 +877,9 @@ function refreshViewMode()
   
   if classic then  
     g_game.changeMapAwareRange(19, 15)
-    gameRootPanel:addAnchor(AnchorTop, 'topMenu', AnchorBottom)
+    if not modules.client_topmenu.getTopMenu().hideIngame then
+      gameRootPanel:addAnchor(AnchorTop, 'topMenu', AnchorBottom)
+    end
     gameMapPanel:addAnchor(AnchorLeft, 'gameLeftPanels', AnchorRight)
     gameMapPanel:addAnchor(AnchorRight, 'gameRightPanels', AnchorLeft)
     gameMapPanel:addAnchor(AnchorBottom, 'gameBottomPanel', AnchorTop)    
@@ -900,7 +902,7 @@ function refreshViewMode()
     gameRootPanel:fill('parent')
     gameMapPanel:setKeepAspectRatio(false)
     gameMapPanel:setLimitVisibleRange(false)
-    gameMapPanel:setZoom(14)
+    gameMapPanel:setZoom(15)
                
     modules.client_topmenu.getTopMenu():setImageColor('#ffffff66')  
     
@@ -939,10 +941,13 @@ function updateSize()
     local dwidth = dimenstion.width
     local tileSize = rheight / dheight
     local maxWidth = tileSize * (awareRange.width + 1)
-    if g_game.getFeature(GameChangeMapAwareRange) then
-      local maxWidth = tileSize * (awareRange.width - 1)
+    if g_game.getFeature(GameChangeMapAwareRange) and g_game.getFeature(GameNewWalking) then
+      maxWidth = tileSize * (awareRange.width - 1)
     end
-    gameMapPanel:setMarginTop(-tileSize * 2)
+    gameMapPanel:setMarginTop(-tileSize)
+    if modules.game_stats then
+      modules.game_stats.ui:setMarginTop(tileSize)
+    end
     if g_settings.getBoolean("cacheMap") then
       gameMapPanel:setMarginLeft(0)
       gameMapPanel:setMarginRight(0)    
@@ -951,11 +956,18 @@ function updateSize()
       gameMapPanel:setMarginLeft(margin)
       gameMapPanel:setMarginRight(margin)
     end
-    
-    if modules.game_textmessage then
-      modules.game_textmessage.messagesPanel:setMarginTop(-gameMapPanel:getMarginTop())
+      
+    if modules.game_bot then
+      for i, child in ipairs(gameMapPanel:getChildren()) do
+        if child.botIcon and child.onGeometryChange then
+          child.onGeometryChange(child)
+        end
+      end
     end
-    
+  else
+    if modules.game_stats then
+      modules.game_stats.ui:setMarginTop(0)
+    end  
   end
   
     --[[

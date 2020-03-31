@@ -18,7 +18,9 @@ MainWindow
     margin-top: 15
     margin-left: 22
     padding: 4 4 4 4
+    size: 96 96
     fixed-creature-size: true
+    raw: true
 
   Label
     id: outfitName
@@ -44,14 +46,16 @@ MainWindow
     enabled: true
     @onClick: modules.game_outfit.previousOutfitType()
 
-  Creature
+  Creature    
     id: mountCreatureBox
     anchors.top: parent.top
     anchors.right: parent.right
     margin-top: 15
     margin-right: 22
     padding: 4 4 4 4
+    size: 96 96
     fixed-creature-size: true
+    raw: true
 
   Label
     id: mountName

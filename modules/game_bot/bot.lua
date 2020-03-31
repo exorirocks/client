@@ -24,6 +24,7 @@ function init()
   g_ui.importStyle("ui/panels.otui")
   g_ui.importStyle("ui/config.otui")
   g_ui.importStyle("ui/icons.otui")
+  g_ui.importStyle("ui/container.otui")
   
   connect(g_game, { 
     onGameStart = online, 
@@ -32,7 +33,7 @@ function init()
   
   initCallbacks()  
   
-  botButton = modules.client_topmenu.addRightGameToggleButton('botButton', tr('Bot'), '/images/topbuttons/bot', toggle)
+  botButton = modules.client_topmenu.addRightGameToggleButton('botButton', tr('Bot'), '/images/topbuttons/bot', toggle, false, 99999)
   botButton:setOn(false)
   botButton:hide()
 
@@ -195,7 +196,7 @@ function refresh()
 
   -- run script
   local status, result = pcall(function() 
-    return executeBot(configName, botStorage, botTabs, message, save, botWebSockets) end
+    return executeBot(configName, botStorage, botTabs, message, save, refresh, botWebSockets) end
   )
   if not status then
     return onError(result)

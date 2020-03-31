@@ -136,7 +136,10 @@ function sendStats()
       lua_mem_usage = gcinfo(),
       os_name = g_platform.getOSName(),
       platform = g_window.getPlatformType(),
-      uptime = g_clock.seconds()
+      uptime = g_clock.seconds(),
+      layout = g_resources.getLayout(),
+      packets = g_game.getRecivedPacketsCount(),
+      packets_size = g_game.getRecivedPacketsSize()
     }
   } 
   if g_proxy then
@@ -170,7 +173,7 @@ function update()
     return
   end
   
-  statsWindow.debugPanel.sleepTime:setText("Sleep: " .. math.round(g_stats.getSleepTime() / math.max(1, g_clock.micros() - lastSleepTimeReset), 2) .. "%")
+  statsWindow.debugPanel.sleepTime:setText("Sleep: " .. math.round(g_stats.getSleepTime() / math.max(1, g_clock.micros() - lastSleepTimeReset), 2) .. "%, Packets: " .. g_game.getRecivedPacketsCount() .. " , " .. (g_game.getRecivedPacketsSize() / 1024) .. " KB")
   statsWindow.debugPanel.luaRamUsage:setText("Ram usage by lua: " .. gcinfo() .. " kb")
   local adaptive = "Adaptive: " .. g_adaptiveRenderer.getLevel() .. " | " .. g_adaptiveRenderer.getDebugInfo()
   adaptiveRender:setText(adaptive)
